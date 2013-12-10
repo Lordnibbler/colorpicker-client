@@ -1,5 +1,6 @@
 Http   = require 'http'
-Socket = require 'socket.io'
+# socket = require 'socket.io-client'
+io     = require 'socket.io-client'
 logger = require './logger'
 FS     = require 'fs'
 
@@ -8,23 +9,24 @@ class Server
     @url = "https://#{ @host }:#{ @port }/"
 
   close: (callback) ->
-    @app.close(callback)
+    # @app.close(callback)
 
   run: (callback) ->
-    @app = Http.createServer(@handler).listen(@port, @host, callback)
-    @_sio_configure_listener(@app)
+    socket = io.connect("localhost",
+      port: 1337
+    )
+    socket.on "connect", ->
+      console.log "socket connected"
 
-  handler: (req, res) ->
-    res.writeHead 200
-    res.end
+      socket.on "colorChangedBeagleBone", (data) ->
+        console.log colorChangedBeagleBone
+        console.log data
 
-  _sio_configure_listener: (app) ->
-    _this = this
-    sio = Socket.connect('http://127.0.0.1:1337')
+    socket.emit "private message",
+      user: "me"
+      msg: "whazzzup?"
 
-    sio.on 'colorChangedBeagleBone', (data) ->
-      console.log 'colorChangedBeagleBone emitted'
-      console.log data
+
 
   _write_colors_data_to_file: (data) ->
     logger.debug JSON.stringify(data, null, 2)

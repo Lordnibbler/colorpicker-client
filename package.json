@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "description": "A beaglebone Node.js client to listen to colorpicker, and pipe current color data into a writeStream.",
   "scripts": {
+    "start": "./bin/colorpicker_beaglebone",
     "test": "npm test"
   },
   "repository": {
