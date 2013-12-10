@@ -1,7 +1,7 @@
 {
   "server": {
-    "host": "0.0.0.0",
-    "port": 1338
+    "host": "colorpicker.herokuapp.com",
+    "port": 1337
   },
 
   "log": {
