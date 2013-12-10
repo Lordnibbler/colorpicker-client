@@ -18,15 +18,11 @@ class Server
     socket.on "connect", ->
       console.log "socket connected"
 
-    socket.on "colorChangedBeagleBone", (data) ->
-      console.log colorChangedBeagleBone
-      console.log data
+    socket.on "colorChangedBeagleBone", (data) =>
+      @_write_colors_data_to_file(data)
 
-    # socket.emit "private message",
-    #   user: "me"
-    #   msg: "whazzzup?"
-
-
+    socket.on "colorSetBeagleBone", (data) =>
+      @_write_colors_data_to_file(data)
 
   _write_colors_data_to_file: (data) ->
     logger.debug JSON.stringify(data, null, 2)
