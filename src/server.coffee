@@ -12,9 +12,8 @@ class Server
     # @app.close(callback)
 
   run: (callback) ->
-    socket = io.connect(@host,
-      port: @port
-    )
+    socket = io.connect @host
+
     socket.on "connect", ->
       console.log "socket connected"
 
