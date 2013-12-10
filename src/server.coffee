@@ -12,19 +12,19 @@ class Server
     # @app.close(callback)
 
   run: (callback) ->
-    socket = io.connect("localhost",
-      port: 1337
+    socket = io.connect(@host,
+      port: @port
     )
     socket.on "connect", ->
       console.log "socket connected"
 
-      socket.on "colorChangedBeagleBone", (data) ->
-        console.log colorChangedBeagleBone
-        console.log data
+    socket.on "colorChangedBeagleBone", (data) ->
+      console.log colorChangedBeagleBone
+      console.log data
 
-    socket.emit "private message",
-      user: "me"
-      msg: "whazzzup?"
+    # socket.emit "private message",
+    #   user: "me"
+    #   msg: "whazzzup?"
 
 
 
