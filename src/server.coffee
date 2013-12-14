@@ -1,18 +1,17 @@
 Http   = require 'http'
-# socket = require 'socket.io-client'
 io     = require 'socket.io-client'
 logger = require './logger'
 FS     = require 'fs'
 
 class Server
   constructor: (@host, @port, @options = {}) ->
-    @url = "https://#{ @host }:#{ @port }/"
+    @url = "http://#{ @host }:#{ @port }/"
 
   close: (callback) ->
-    # @app.close(callback)
+    io.disconnect
 
   run: (callback) ->
-    socket = io.connect @host
+    socket = io.connect @url
 
     socket.on "connect", ->
       console.log "socket connected"
