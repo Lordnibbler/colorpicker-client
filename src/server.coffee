@@ -5,7 +5,7 @@ FS     = require 'fs'
 
 class Server
   constructor: (@host, @port, @options = {}) ->
-    @url = "http://#{ @host }:#{ @port }/"
+    @url = "http://#{ @host }:#{ @port }/beagleBone"
 
   close: (callback) ->
     io.disconnect
@@ -16,11 +16,10 @@ class Server
     socket.on "connect", ->
       console.log "socket connected"
 
-    socket.on "colorChangedBeagleBone", (data) =>
-      @_write_colors_data_to_file(data)
-
-    socket.on "colorSetBeagleBone", (data) =>
-      @_write_colors_data_to_file(data)
+    # write our preformatted backbone.js
+    # color data to colors.txt
+    socket.on "colorChanged", @_write_colors_data_to_file
+    socket.on "colorSet",     @_write_colors_data_to_file
 
   _write_colors_data_to_file: (data) ->
     logger.debug JSON.stringify(data, null, 2)
