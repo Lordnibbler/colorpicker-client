@@ -1,7 +1,7 @@
 Fs     = require 'fs'
 Server = require './src/server'
 
-loadServer = (host, port) ->
-  new Server host, port
+loadServer = (host, port, options) ->
+  new Server host, port, options
 
 module.exports.loadServer = loadServer

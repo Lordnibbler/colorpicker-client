@@ -10,7 +10,8 @@ logger.debug JSON.stringify(config, null, 2)
 
 server = ColorPicker.loadServer(
   config.server.host,
-  config.server.port
+  config.server.port,
+  { namespace: config.server.namespace }
 )
 
 server.run()

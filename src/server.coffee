@@ -5,7 +5,7 @@ FS     = require 'fs'
 
 class Server
   constructor: (@host, @port, @options = {}) ->
-    @url = "http://#{ @host }:#{ @port }/beagleBone"
+    @url = "http://#{ @host }/#{ @options.namespace }"
 
   close: (callback) ->
     io.disconnect
