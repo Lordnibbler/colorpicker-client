@@ -1,7 +1,8 @@
-Fs     = require 'fs'
 Server = require './src/server'
+config = require './src/config'
 
-loadServer = (host, port, options) ->
-  new Server host, port, options
-
-module.exports.loadServer = loadServer
+new Server(
+  config.server.host,
+  config.server.port,
+  { namespace: config.server.namespace }
+).run()
