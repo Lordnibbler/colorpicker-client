@@ -1,6 +1,7 @@
 {
   "server": {
     "host": "colorpicker.herokuapp.com",
+    "port": 80,
     "namespace": "beaglebone"
   },
 
