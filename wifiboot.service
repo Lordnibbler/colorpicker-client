@@ -1,0 +1,9 @@
+[Unit]
+Description=Wifi Startup Retry
+ 
+[Service]
+WorkingDirectory=/home/root/wifiboot/
+ExecStart=/home/root/wifiboot/wifiboot.sh
+ 
+[Install]
+WantedBy=multi-user.target
