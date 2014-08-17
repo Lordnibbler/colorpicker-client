@@ -2,7 +2,7 @@
 
 
 var SerialPort = require("serialport").SerialPort;
-var serialPort = new SerialPort("/dev/tty01", {
+var serialPort = new SerialPort("/dev/ttyO1", {
   baudrate: 115200
 });
 

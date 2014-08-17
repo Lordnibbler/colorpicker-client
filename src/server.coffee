@@ -1,40 +1,73 @@
-Http   = require 'http'
-io     = require 'socket.io-client'
-logger = require './logger'
-FS     = require 'fs'
+Http       = require 'http'
+io         = require 'socket.io-client'
+SerialPort = require('serialport').SerialPort
+logger     = require './logger'
+FS         = require 'fs'
+serial_port = undefined
 
 class Server
   constructor: (@host, @port, @options = {}) ->
 
   #
+  # connect to tty and socket.io
+  #
+  run: (callback) ->
+    # @_setup_sio()
+    @_setup_serialport()
+
+  #
   # @return [String] URL based on config
   #
-  url: ->
+  _url: ->
     "http://#{ @host }#{ if @port? then ":#{@port}" else '' }/#{ @options.namespace }"
 
   #
   # connect socket.io client to url, bind to socket.io events and our custom events
   #
-  run: (callback) ->
-    logger.debug "Connecting to url #{@url()}"
-    socket = new io(@url(), {})
-
-    socket.on 'connect',             => console.log "connected to socket at #{@url()}"
+  _setup_sio: ->
+    logger.debug "Socket.io connecting to url #{@_url()}"
+    socket = new io(@_url(), {})
+    socket.on 'connect',             => console.log "connected to socket at #{@_url()}"
     socket.on 'connect_error', (obj) => console.log 'connect error', obj
-    socket.on 'disconnect',          => console.log "socket at #{@url()} disconnected"
-    socket.on 'colorChanged',           @_write_colors_data_to_file
-    socket.on 'colorSet',               @_write_colors_data_to_file
+    socket.on 'disconnect',          => console.log "socket at #{@_url()} disconnected"
+    socket.on 'colorChanged',           @_write_colors_over_tty
+    socket.on 'colorSet',               @_write_colors_over_tty
 
   #
-  # write our preformatted backbone.js color data to colors.txt
+  # connect to /dev/ttyO1, on success fire a call to _setup_sio()
   #
-  _write_colors_data_to_file: (data) ->
-    logger.debug JSON.stringify(data, null, 2)
+  _setup_serialport: ->
+    tty = '/dev/ttyO1'
+    logger.debug "Node serialport connecting to #{tty}"
 
-    ws = FS.createWriteStream("#{__dirname}/../colors.txt", { flags: "w+" })
-    ws.write(data.color, (err, written) ->
-      throw err if err
-      ws.end()
+    serial_port = new SerialPort(tty,
+      baudrate: 115200
     )
+
+    serial_port.on "open", =>
+      console.log "Node serialport connected to #{tty}"
+
+      @_setup_sio()
+
+      serial_port.on 'data', (data) ->
+        console.log 'data received: ' + data
+
+  #
+  # break our colors string into array, write each color to the appropriate address
+  # @example data
+  #   { color: '000,110,255,000\n000,110,255,000\n000,110,255,000\n000,110,255,000\n000,110,255,000\n' }
+  #
+  _write_colors_over_tty: (data) ->
+    logger.debug '_write_colors_over_tty'
+
+    colors = data.color.split '\n'
+    colors.pop()
+
+    logger.debug "colors: #{colors} length: #{colors.length}"
+    instruction = ''
+    for color, i in colors
+      instruction += "4,#{i+1},#{color};"
+    logger.debug "writing to serial port: #{instruction}"
+    serial_port.write instruction
 
 module.exports = Server

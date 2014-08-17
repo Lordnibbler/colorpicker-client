@@ -16,8 +16,9 @@
     "url": "https://github.com/Lordnibbler/colorpicker-beaglebone/issues"
   },
   "dependencies": {
-    "log": "~1.4.0",
     "coffee-script": "~1.7",
+    "log": "~1.4.0",
+    "serialport": "~1.4.5",
     "socket.io": "~1.0.6",
     "socket.io-client": "~1.0.6"
   },
