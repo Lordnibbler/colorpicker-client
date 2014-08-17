@@ -5,8 +5,7 @@ use Time::HiRes qw(usleep time);
 use POSIX ":sys_wait_h";
 #use LWP::Simple qw (get);
 
-# @FIXME
-# missing this dir in github!
+# @FIXME missing this dir in github!
 $cmddir = "/home/root/halo_git/commands/";
 
 our $NUM_LIGHTS = 5;
@@ -57,52 +56,11 @@ sub turnOffAll {
   }
 }
 
-sub handleCommands{
-  opendir my($dh), $cmddir or die "Couldn't open dir '$dirname': $!";
-  my @files =  grep { !/^\./ } readdir $dh;
-  closedir $dh;
-  usleep(1000);
-  foreach $filename (@files){
-    print "$filename found, opening...\n";
-    $fullname =  "$cmddir$filename";
-    open (COMMAND_FILE, "< $fullname");
-    $command = <COMMAND_FILE>;
-    print "read $command\n";
 
-    if ($command =~ /POWER\s+([0-1])/){
-      $SYSTEM_ON = $1;
-      if($SYSTEM_ON == 0){
-        &turnOffAll();
-      }
-    }elsif ($command =~ /ACTIVE_PLAYLIST\s+([\w0-9]*)/){
-      openPlaylist($1);
-    }elsif ($command =~ /CHANGE_LIGHT/){
-      print "Previewing\n";
-      $SYSTEM_ON = 0;
-      while($color = <COMMAND_FILE>){
-         # for(my $address = 0; $address < $NUM_LIGHTS; $address ++){
-        if($color =~ /([0-9]+)\,([0-9]+)\,([0-9]+)\,([0-9]+)/){
-          print "$1, $2, $3, $4 found\n";
-          &sendColor($address,$1,$2,$3,$4);
-        }
-
-      }
-    }elsif ($command =~ /LIVE_PREVIEW\s+([\w0-9]*)/){
-       $LIVE_PREVIEW = $1;
-       $SYSTEM_ON = 0;
-    }
-    close(COMMAND_FILE);
-    unlink($fullname);
-
-  }
-
-}
 
 $start_time = time();
 
 sub grabLiveData{
-  # open(COLORS, '|-', "wget -q -O- http://colorpicker.herokuapp.com/api/redis_get_colors");
-  # open(PREVIEW_DATA, "wget -q -O- http://colorpicker.herokuapp.com/api/redis_get_colors 2>/dev/null |");
   # print @preview_data;
 
   $rin = '';
@@ -157,8 +115,7 @@ sub grabLiveData{
 }
 
 while(1){
-  &handleCommands();
   if($LIVE_PREVIEW == 1){
-      &grabLiveData();
+    &grabLiveData();
   }
 }
