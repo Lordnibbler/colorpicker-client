@@ -60,13 +60,20 @@ class Server
   _write_colors_over_tty: (data) ->
     logger.debug '_write_colors_over_tty'
 
+    # break colors string into array
     colors = data.color.split '\n'
     colors.pop()
 
+    # build our TTY instruction, padding with black if necessary
     logger.debug "colors: #{colors} length: #{colors.length}"
     instruction = ''
-    for color, i in colors
-      instruction += "4,#{i+1},#{color};"
+    instruction += "4,#{i+1},#{color};" for color, i in colors
+
+    instruction_count = (instruction.match(/;/g)||[]).length
+    for i in [instruction_count...5]
+      instruction += "4,#{i+1},000,000,000,000;"
+
+    # write over TTY
     logger.debug "writing to serial port: #{instruction}"
     serial_port.write instruction
 
