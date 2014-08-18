@@ -30,7 +30,9 @@ class Server
     socket.on 'connect',             => console.log "connected to socket at #{@_url()}"
     socket.on 'connect_error', (obj) => console.log 'connect error', obj
     socket.on 'disconnect',          => console.log "socket at #{@_url()} disconnected"
-    socket.on 'colorChanged',           @_write_colors_over_tty
+    socket.on 'colorChanged', (data) =>
+      @_write_colors_over_tty(data)
+
     socket.on 'colorSet',               @_write_colors_over_tty
 
   #
@@ -45,12 +47,13 @@ class Server
     )
 
     serial_port.on "open", =>
-      console.log "Node serialport connected to #{tty}"
+      logger.info "Node serialport connected to #{tty}"
+      logger.debug serial_port
 
       @_setup_sio()
 
       serial_port.on 'data', (data) ->
-        console.log 'data received: ' + data
+        logger.info 'data received: ' + data
 
   #
   # break our colors string into array, write each color to the appropriate address
@@ -64,11 +67,12 @@ class Server
     colors = data.color.split '\n'
     colors.pop()
 
-    # build our TTY instruction, padding with black if necessary
+    # build our TTY instruction
     logger.debug "colors: #{colors} length: #{colors.length}"
     instruction = ''
     instruction += "4,#{i+1},#{color};" for color, i in colors
 
+    # padding with black if necessary
     instruction_count = (instruction.match(/;/g)||[]).length
     for i in [instruction_count...5]
       instruction += "4,#{i+1},000,000,000,000;"
@@ -78,5 +82,8 @@ class Server
     serial_port.write instruction, (err, results) ->
       logger.debug 'serial_port.write err: ' + err if err
       logger.debug 'serial_port.write results: ' + results if results
+      serial_port.drain( (error) ->
+        logger.debug "serial_port drained! with error: #{error}"
+      )
 
 module.exports = Server
