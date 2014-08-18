@@ -34,8 +34,11 @@ class Server
 
     socket.on 'connect_error', (obj) => console.log 'connect error', obj
     socket.on 'disconnect',          => console.log "socket at #{@_url()} disconnected"
-    socket.on 'colorChanged',           @_to_buffer
-    socket.on 'colorSet',               @_to_buffer
+    socket.on 'colorChanged', (data) =>
+      @_to_buffer(data)
+
+    socket.on 'colorSet', (data) =>
+      @_to_buffer(data)
 
   #
   # connect to /dev/ttyO1, on success fire a call to _setup_sio()
@@ -64,6 +67,7 @@ class Server
   #   # => '4,1,000,110,255,000;'
   #
   _data_to_instruction: (data) ->
+    console.log "called _data_to_instruction"
     # break colors string into array
     colors = data.color.split '\n'
     colors.pop()
@@ -75,7 +79,8 @@ class Server
 
     # padding with black if necessary
     instruction_count = (instruction.match(/;/g)||[]).length
-    instruction += "4,#{i+1},000,000,000,000;" for i in [instruction_count...5]
+    for i in [instruction_count...5]
+      instruction += "4,#{i+1},000,000,000,000;"
     return instruction
 
   #
@@ -84,45 +89,34 @@ class Server
   #
   _write_buffer: ->
     setTimeout (=>
-      logger.info "writing buffer '#{buffer}' to serial port"
-      serial_port.write buffer, (err, results) =>
-        logger.info "serial port written"
+      if buffer.length == 0
+        @_write_buffer()
+        return
+      else
+        logger.info "writing buffer '#{buffer}' to serial port"
+        serial_port.write buffer, (err, results) =>
+          logger.info "serial port written"
 
-        serial_port.drain((error) =>
-          logger.info "serial port drained"
-          @_clear_buffer()
-          @_write_buffer()
-        )
-    ), 1000
+          serial_port.drain((error) =>
+            logger.info "serial port drained"
+            @_clear_buffer()
+            @_write_buffer()
+          )
+    ), 50
 
   #
   # write socket.io color data to buffer as UART instruction
   #
   _to_buffer: (data) ->
+    # @_clear_buffer();
     logger.info "writing to buffer #{data.color}"
-    buffer += @_data_to_instruction(data)
+    buffer = @_data_to_instruction(data)
 
+  #
+  # empty the buffer
+  #
   _clear_buffer: ->
     logger.info "clearing buffer"
     buffer = ''
-
-  #
-  # break our colors string into array, write each color to the appropriate address
-  # @example data
-  #   { color: '000,110,255,000\n000,110,255,000\n000,110,255,000\n000,110,255,000\n000,110,255,000\n' }
-  #
-  # _write_colors_over_tty: (data) ->
-  #   logger.debug '_write_colors_over_tty'
-  #   instruction = @_data_to_instruction(data)
-  #
-  #   # write over TTY
-  #   logger.debug "writing to serial port: #{instruction}"
-  #   serial_port.write instruction, (err, results) ->
-  #     logger.debug 'serial_port.write err: ' + err if err
-  #     logger.debug 'serial_port.write results: ' + results if results
-  #     serial_port.drain( (error) ->
-  #       logger.debug "serial_port drained! with error: #{error}"
-  #     )
-
 
 module.exports = Server
