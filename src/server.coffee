@@ -11,7 +11,7 @@ class Server
   constructor: (@host, @port, @options = {}) ->
 
   #
-  # connect to tty and socket.io
+  # connect to kernel and socket.io
   #
   run: (callback) ->
     @_setup_writestream()
@@ -32,8 +32,8 @@ class Server
     socket.on 'connect', =>
       console.log "connected to socket at #{@_url()}"
 
-      # make an initial call to our recursive serialport write method
-      @_write_file()
+      # make an initial call to our recursive _write_pipe() method
+      @_write_pipe()
 
     socket.on 'connect_error', (obj) => console.log 'connect error', obj
     socket.on 'disconnect',          => console.log "socket at #{@_url()} disconnected"
@@ -41,23 +41,26 @@ class Server
     socket.on 'colorSet',     (data) => @_to_buffer(data)
 
   #
-  # connect to /dev/ttyO1, on success fire a call to _setup_sio()
+  # create writestream to kernel at /dev/ttyO1
   #
   _setup_writestream: ->
-    ws = FS.createWriteStream("/dev/ttyO1", { flags: "w+" });
+    ws = FS.createWriteStream "/dev/ttyO1",
+      flags: "w+"
 
-  _write_file: ->
+  #
+  # write buffer directly to the kernel via /dev/ttyO1 pipe
+  # if buffer has content, at 15ms resolution. recursively call this function on success
+  #
+  _write_pipe: ->
     setTimeout (=>
       if buffer.length == 0
-        @_write_file()
+        @_write_pipe()
         return
       else
-        console.log "writing to file"
-        console.log buffer
         ws.write(buffer, (err, written) =>
           throw err if err
           buffer = ''
-          @_write_file()
+          @_write_pipe()
         )
     ), 15
 
@@ -68,9 +71,6 @@ class Server
   #   # => '4,1,000,110,255,000;'
   #
   _data_to_instruction: (data) ->
-    # console.log "called _data_to_instruction"
-    # console.log data
-
     # break colors string into array
     colors = data.color.split '\n'
     colors.pop()
@@ -91,12 +91,5 @@ class Server
   _to_buffer: (data) ->
     # logger.info "writing to buffer #{data.color}"
     buffer = @_data_to_instruction(data)
-
-  #
-  # empty the buffer
-  #
-  _clear_buffer: ->
-    # logger.info "clearing buffer"
-    buffer = ''
 
 module.exports = Server
