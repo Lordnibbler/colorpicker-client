@@ -75,6 +75,8 @@ class Server
 
     # write over TTY
     logger.debug "writing to serial port: #{instruction}"
-    serial_port.write instruction
+    serial_port.write instruction, (err, results) ->
+      logger.debug 'serial_port.write err: ' + err if err
+      logger.debug 'serial_port.write results: ' + results if results
 
 module.exports = Server
