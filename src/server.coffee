@@ -49,7 +49,7 @@ class Server
 
   #
   # write buffer directly to the kernel via /dev/ttyO1 pipe
-  # if buffer has content, at 15ms resolution. recursively call this function on success
+  # if buffer has content, at 30ms resolution. recursively call this function on success
   #
   _write_pipe: ->
     setTimeout (=>
@@ -62,7 +62,7 @@ class Server
           buffer = ''
           @_write_pipe()
         )
-    ), 15
+    ), 30
 
   #
   # convert halo rgba string to a UART instruction
