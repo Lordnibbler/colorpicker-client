@@ -1,11 +1,9 @@
-Http        = require 'http'
-io          = require 'socket.io-client'
-SerialPort  = require('serialport').SerialPort
-logger      = require './logger'
-FS          = require 'fs'
-serial_port = undefined
-buffer      = ''
-ws = undefined
+Http   = require 'http'
+io     = require 'socket.io-client'
+logger = require './logger'
+FS     = require 'fs'
+buffer = ''
+ws     = undefined
 
 class Server
   constructor: (@host, @port, @options = {}) ->
