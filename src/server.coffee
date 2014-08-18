@@ -27,7 +27,7 @@ class Server
   # connect socket.io client to url, bind to socket.io events and our custom events
   #
   _setup_sio: ->
-    logger.debug "Socket.io connecting to url #{@_url()}"
+    # logger.debug "Socket.io connecting to url #{@_url()}"
     socket = new io(@_url(), {})
     socket.on 'connect', =>
       console.log "connected to socket at #{@_url()}"
@@ -52,12 +52,14 @@ class Server
         @_write_file()
         return
       else
+        console.log "writing to file"
+        console.log buffer
         ws.write(buffer, (err, written) =>
           throw err if err
-          # ws.end()
+          buffer = ''
           @_write_file()
         )
-    ), 25
+    ), 15
 
   #
   # convert halo rgba string to a UART instruction
@@ -66,15 +68,15 @@ class Server
   #   # => '4,1,000,110,255,000;'
   #
   _data_to_instruction: (data) ->
-    console.log "called _data_to_instruction"
-    console.log data
+    # console.log "called _data_to_instruction"
+    # console.log data
 
     # break colors string into array
     colors = data.color.split '\n'
     colors.pop()
 
     # build our TTY instruction
-    logger.debug "colors: #{colors} length: #{colors.length}"
+    # logger.debug "colors: #{colors} length: #{colors.length}"
     instruction = ''
     instruction += "4,#{i+1},#{color};" for color, i in colors
 
@@ -87,14 +89,14 @@ class Server
   # write socket.io color data to buffer as UART instruction
   #
   _to_buffer: (data) ->
-    logger.info "writing to buffer #{data.color}"
+    # logger.info "writing to buffer #{data.color}"
     buffer = @_data_to_instruction(data)
 
   #
   # empty the buffer
   #
   _clear_buffer: ->
-    logger.info "clearing buffer"
+    # logger.info "clearing buffer"
     buffer = ''
 
 module.exports = Server
