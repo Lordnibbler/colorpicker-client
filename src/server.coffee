@@ -51,6 +51,7 @@ class Server
   #
   _write_pipe: ->
     setTimeout (=>
+      console.log "setTimeout called with buffer #{buffer}"
       if buffer.length == 0
         @_write_pipe()
         return
@@ -60,6 +61,7 @@ class Server
           buffer = ''
           @_write_pipe()
         )
+        return
     ), 30
 
   #
