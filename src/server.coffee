@@ -2,10 +2,11 @@ Http   = require 'http'
 io     = require 'socket.io-client'
 logger = require './logger'
 FS     = require 'fs'
-buffer = ''
-ws     = undefined
 
 class Server
+  buffer: ''
+  ws: undefined
+
   constructor: (@host, @port, @options = {}) ->
 
   #
@@ -25,10 +26,9 @@ class Server
   # connect socket.io client to url, bind to socket.io events and our custom events
   #
   _setup_sio: ->
-    # logger.debug "Socket.io connecting to url #{@_url()}"
     socket = new io(@_url(), {})
     socket.on 'connect', =>
-      console.log "connected to socket at #{@_url()}"
+      logger.info "connected to socket at #{@_url()}"
 
       # make an initial call to our recursive _write_pipe() method
       @_write_pipe()
@@ -42,23 +42,20 @@ class Server
   # create writestream to kernel at /dev/ttyO1
   #
   _setup_writestream: ->
-    ws = FS.createWriteStream "/dev/ttyO1",
+    @ws = FS.createWriteStream "/dev/ttyO1",
       flags: "w+"
 
   #
-  # write buffer directly to the kernel via /dev/ttyO1 pipe
-  # if buffer has content, at 30ms resolution. recursively call this function on success
+  # if buffer has content, write buffer directly to the kernel via /dev/ttyO1 pipe
+  # at 15ms resolution. recursively call this function using setInterval()
   #
   _write_pipe: ->
     setInterval (=>
-      # console.log "setInterval called with buffer #{buffer}"
-      return if buffer.length == 0
-      ws.write(buffer, (err, written) =>
+      return if @buffer.length == 0
+      @ws.write(@buffer, (err, written) =>
         throw err if err
-        buffer = ''
-        # @_write_pipe()
+        @buffer = ''
       )
-      # return
     ), 15
 
   #
@@ -68,12 +65,11 @@ class Server
   #   # => '4,1,000,110,255,000;'
   #
   _data_to_instruction: (data) ->
-    # break colors string into array
+    # break colors string into array, pop empty last value
     colors = data.color.split '\n'
     colors.pop()
 
     # build our TTY instruction
-    # logger.debug "colors: #{colors} length: #{colors.length}"
     instruction = ''
     instruction += "4,#{i+1},#{color};" for color, i in colors
 
@@ -86,7 +82,6 @@ class Server
   # write socket.io color data to buffer as UART instruction
   #
   _to_buffer: (data) ->
-    # logger.info "writing to buffer #{data.color}"
-    buffer = @_data_to_instruction(data)
+    @buffer = @_data_to_instruction(data)
 
 module.exports = Server
