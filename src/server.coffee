@@ -50,13 +50,27 @@ class Server
   # at 15ms resolution. recursively call this function using setInterval()
   #
   _write_pipe: ->
-    setInterval (=>
-      return if @buffer.length == 0
-      @ws.write(@buffer, (err, written) =>
-        throw err if err
-        @buffer = ''
-      )
-    ), 15
+    setImmediate (=>
+      if @buffer.length == 0
+        @_write_pipe()
+      else
+        ok = @ws.write @buffer
+        if ok
+          @buffer = ''
+          @_write_pipe()
+        else
+          @ws.once('drain', =>
+            @buffer = ''
+            @_write_pipe
+          )
+    )
+
+    # setImmediate(=>
+    #   @ws.write(@buffer, (err, written) =>
+    #     throw err if err
+    #     @buffer = ''
+    #   )
+    # )
 
   #
   # convert halo rgba string to a UART instruction
@@ -83,5 +97,6 @@ class Server
   #
   _to_buffer: (data) ->
     @buffer = @_data_to_instruction(data)
+    @_write_pipe()
 
 module.exports = Server
