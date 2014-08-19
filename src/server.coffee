@@ -50,19 +50,16 @@ class Server
   # if buffer has content, at 30ms resolution. recursively call this function on success
   #
   _write_pipe: ->
-    setTimeout (=>
-      console.log "setTimeout called with buffer #{buffer}"
-      if buffer.length == 0
-        @_write_pipe()
-        return
-      else
-        ws.write(buffer, (err, written) =>
-          throw err if err
-          buffer = ''
-          @_write_pipe()
-        )
-        return
-    ), 30
+    setInterval (=>
+      # console.log "setInterval called with buffer #{buffer}"
+      return if buffer.length == 0
+      ws.write(buffer, (err, written) =>
+        throw err if err
+        buffer = ''
+        # @_write_pipe()
+      )
+      # return
+    ), 15
 
   #
   # convert halo rgba string to a UART instruction
