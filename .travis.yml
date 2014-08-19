@@ -1,0 +1,12 @@
+language: node_js
+node_js:
+  - "0.10.30"
+before_install:
+script:
+  - "which node"
+
+env:
+  - NODE_ENV=test
+cache:
+  directories:
+    - node_modules
