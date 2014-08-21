@@ -50,7 +50,23 @@ class Server
   # at 15ms resolution. recursively call this function using setInterval()
   #
   _write_pipe: ->
-    setTimeout (=>
+    # setTimeout (=>
+    #   if @buffer.length == 0
+    #     @_write_pipe()
+    #   else
+    #     ok = @ws.write @buffer
+    #     if ok
+    #       @buffer = ''
+    #       @_write_pipe()
+    #     else
+    #       @ws.once('drain', =>
+    #         @buffer = ''
+    #         @_write_pipe
+    #       )
+    # ), 100
+
+    # setTimeout (=>
+    setImmediate (=>
       if @buffer.length == 0
         @_write_pipe()
       else
@@ -63,14 +79,12 @@ class Server
             @buffer = ''
             @_write_pipe
           )
-    ), 100
+    )
+    # ), 50
 
-    # setImmediate(=>
-    #   @ws.write(@buffer, (err, written) =>
-    #     throw err if err
-    #     @buffer = ''
-    #   )
-    # )
+
+
+
 
   #
   # convert halo rgba string to a UART instruction
