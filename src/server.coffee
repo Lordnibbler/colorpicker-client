@@ -50,6 +50,32 @@ class Server
   # at 15ms resolution. recursively call this function using setInterval()
   #
   _write_pipe: ->
+    # setInterval is recursive by default
+    setInterval (=>
+      # console.log "setInterval called with buffer #{buffer}"
+      return if @buffer.length == 0
+      @ws.write(@buffer, (err, written) =>
+        throw err if err
+        @buffer = ''
+        # @_write_pipe()
+      )
+      # return
+    ), 15
+
+    # setInterval (=>
+    #   # console.log "setInterval called with buffer #{buffer}"
+    #   return if @buffer.length == 0
+    #   @ws.write(@buffer, (err, written) =>
+    #     throw err if err
+    #     @buffer = ''
+    #     # @_write_pipe()
+    #   )
+    #   # return
+    # ), 50
+
+
+
+    # normal recursive setTimeout method
     # setTimeout (=>
     #   if @buffer.length == 0
     #     @_write_pipe()
@@ -65,21 +91,22 @@ class Server
     #       )
     # ), 100
 
+    # ensure setImmediate is only called every 50ms
     # setTimeout (=>
-    setImmediate (=>
-      if @buffer.length == 0
-        @_write_pipe()
-      else
-        ok = @ws.write @buffer
-        if ok
-          @buffer = ''
-          @_write_pipe()
-        else
-          @ws.once('drain', =>
-            @buffer = ''
-            @_write_pipe
-          )
-    )
+    #   setImmediate (=>
+    #     if @buffer.length == 0
+    #       @_write_pipe()
+    #     else
+    #       ok = @ws.write @buffer
+    #       if ok
+    #         @buffer = ''
+    #         @_write_pipe()
+    #       else
+    #         @ws.once('drain', =>
+    #           @buffer = ''
+    #           @_write_pipe
+    #         )
+    #   )
     # ), 50
 
 
