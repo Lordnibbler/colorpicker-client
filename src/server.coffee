@@ -50,7 +50,7 @@ class Server
   # at 15ms resolution. recursively call this function using setInterval()
   #
   _write_pipe: ->
-    setImmediate (=>
+    setTimeout (=>
       if @buffer.length == 0
         @_write_pipe()
       else
@@ -63,7 +63,7 @@ class Server
             @buffer = ''
             @_write_pipe
           )
-    )
+    ), 100
 
     # setImmediate(=>
     #   @ws.write(@buffer, (err, written) =>
