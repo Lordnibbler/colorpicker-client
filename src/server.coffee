@@ -4,7 +4,7 @@ logger = require './logger'
 FS     = require 'fs'
 
 class Server
-  buffer: ''
+  buffer: []
   ws: undefined
 
   constructor: (@host, @port, @options = {}) ->
@@ -50,94 +50,27 @@ class Server
   # at 15ms resolution. recursively call this function using setInterval()
   #
   _write_pipe: ->
-    # setInterval is recursive by default
     setInterval (=>
-      # console.log "setInterval called with buffer #{buffer}"
-      return if @buffer.length == 0
-      @ws.write(@buffer, (err, written) =>
-        throw err if err
-        @buffer = ''
-        # @_write_pipe()
-      )
-      # return
-    ), 15
-
-    # setInterval (=>
-    #   # console.log "setInterval called with buffer #{buffer}"
-    #   return if @buffer.length == 0
-    #   @ws.write(@buffer, (err, written) =>
-    #     throw err if err
-    #     @buffer = ''
-    #     # @_write_pipe()
-    #   )
-    #   # return
-    # ), 50
-
-
-
-    # normal recursive setTimeout method
-    # setTimeout (=>
-    #   if @buffer.length == 0
-    #     @_write_pipe()
-    #   else
-    #     ok = @ws.write @buffer
-    #     if ok
-    #       @buffer = ''
-    #       @_write_pipe()
-    #     else
-    #       @ws.once('drain', =>
-    #         @buffer = ''
-    #         @_write_pipe
-    #       )
-    # ), 100
-
-    # ensure setImmediate is only called every 50ms
-    # setTimeout (=>
-    #   setImmediate (=>
-    #     if @buffer.length == 0
-    #       @_write_pipe()
-    #     else
-    #       ok = @ws.write @buffer
-    #       if ok
-    #         @buffer = ''
-    #         @_write_pipe()
-    #       else
-    #         @ws.once('drain', =>
-    #           @buffer = ''
-    #           @_write_pipe
-    #         )
-    #   )
-    # ), 50
-
-
-
-
+      if @buffer.length > 0
+        instruction = @buffer.shift()
+        @ws.write(instruction)
+    ), 1
 
   #
-  # convert halo rgba string to a UART instruction
+  # convert halo rgba string to a UART instruction and push to buffer, padding with black if needed
   # @example
-  #   _data_to_instruction({ color: '000,110,255,000\n' })
-  #   # => '4,1,000,110,255,000;'
+  #   _data_to_buffer({ color: '000,110,255,000\n000,110,255,000\n' })
   #
-  _data_to_instruction: (data) ->
+  _to_buffer: (data) ->
     # break colors string into array, pop empty last value
     colors = data.color.split '\n'
     colors.pop()
+    instruction_count = colors.length
 
     # build our TTY instruction
-    instruction = ''
-    instruction += "4,#{i+1},#{color};" for color, i in colors
+    @buffer.push("4,#{i+1},#{color};") for color, i in colors
 
-    # padding with black if necessary
-    instruction_count = (instruction.match(/;/g)||[]).length
-    instruction += "4,#{i+1},000,000,000,000;" for i in [instruction_count...5]
-    return instruction
-
-  #
-  # write socket.io color data to buffer as UART instruction
-  #
-  _to_buffer: (data) ->
-    @buffer = @_data_to_instruction(data)
-    @_write_pipe()
+    # pad with black if necessary
+    @buffer.push("4,#{i+1},000,000,000,000;") for i in [instruction_count...5]
 
 module.exports = Server
