@@ -51,19 +51,19 @@ class Server
   #
   _write_pipe: ->
     setInterval (=>
-      return if @buffer.length == 0
-      console.log "writing buffer #{@buffer}"
-      @ws.write(@buffer, (err, written) =>
-        throw err if err
-        @buffer = ''
-      )
+      if @buffer.length > 0
+        @ws.write(@buffer, (err, written) =>
+          throw err if err
+          # @ws.flush()
+          @buffer = ''
+        )
     ), 15
 
   #
   # convert halo rgba string to a UART instruction
   # @example
-  #   _data_to_instruction({ color: '000,110,255,000\n' })
-  #   # => '4,1,000,110,255,000;'
+  #   _data_to_instruction({ color: '000,110,255,000\n255,000,000,000' })
+  #   # => '345,5,1,255,000,000;2,255,000,000,3,000,000,000,4,000,000,000,5,000,000,000;'
   #
   _data_to_instruction: (data) ->
     # break colors string into array
