@@ -46,31 +46,47 @@ class Server
       flags: "w+"
 
   #
-  # if buffer has content, write buffer directly to the kernel via /dev/ttyO1 pipe
-  # at 15ms resolution. recursively call this function using setInterval()
+  # write buffer directly to the kernel via /dev/ttyO1 pipe
+  # if buffer has content, at 30ms resolution. recursively call this function on success
   #
   _write_pipe: ->
     setInterval (=>
-      if @buffer.length > 0
-        instruction = @buffer.shift()
-        @ws.write(instruction)
-    ), 1
+      return if @buffer.length == 0
+      console.log "writing buffer #{@buffer}"
+      @ws.write(@buffer, (err, written) =>
+        throw err if err
+        @buffer = ''
+      )
+    ), 15
 
   #
-  # convert halo rgba string to a UART instruction and push to buffer, padding with black if needed
+  # convert halo rgba string to a UART instruction
   # @example
-  #   _data_to_buffer({ color: '000,110,255,000\n000,110,255,000\n' })
+  #   _data_to_instruction({ color: '000,110,255,000\n' })
+  #   # => '4,1,000,110,255,000;'
   #
-  _to_buffer: (data) ->
-    # break colors string into array, pop empty last value
+  _data_to_instruction: (data) ->
+    # break colors string into array
     colors = data.color.split '\n'
     colors.pop()
-    instruction_count = colors.length
+
+    # remove `v` value from each color
+    colors = colors.map (c) -> c.slice(0,-4)
 
     # build our TTY instruction
-    @buffer.push("4,#{i+1},#{color};") for color, i in colors
+    instruction = '345,5,'
+    instruction += "#{i+1},#{color};" for color, i in colors
 
-    # pad with black if necessary
-    @buffer.push("4,#{i+1},000,000,000,000;") for i in [instruction_count...5]
+    # padding with black if necessary
+    instruction_count = (instruction.match(/;/g)||[]).length
+    instruction += "#{i+1},000,000,000;" for i in [instruction_count...5]
+    return instruction
+
+  #
+  # write socket.io color data to buffer as UART instruction
+  #
+  _to_buffer: (data) ->
+    @buffer = @_data_to_instruction(data)
+
 
 module.exports = Server
