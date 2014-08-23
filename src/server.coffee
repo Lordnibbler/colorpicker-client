@@ -50,14 +50,25 @@ class Server
   # if buffer has content, at 30ms resolution. recursively call this function on success
   #
   _write_pipe: ->
-    setInterval (=>
-      if @buffer.length > 0
+    setTimeout (=>
+      if @buffer.length == 0
+        @_write_pipe()
+      else
         @ws.write(@buffer, (err, written) =>
           throw err if err
-          # @ws.flush()
           @buffer = ''
+          @_write_pipe()
         )
-    ), 15
+    ), 30
+
+    # setInterval (=>
+    #   if @buffer.length > 0
+    #     @ws.write(@buffer, (err, written) =>
+    #       # writestream flushed
+    #       throw err if err
+    #       @buffer = ''
+    #     )
+    # ), 15
 
   #
   # convert halo rgba string to a UART instruction
