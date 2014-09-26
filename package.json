@@ -4,7 +4,7 @@
   "description": "A beaglebone Node.js client to listen to colorpicker, and pipe current color data into a writeStream.",
   "scripts": {
     "start": "coffee index.coffee",
-    "test": "npm test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -24,5 +24,10 @@
   "engines": {
     "node": "0.10.x",
     "npm": "1.3.x"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.21.4",
+    "sinon": "^1.10.3"
   }
 }
