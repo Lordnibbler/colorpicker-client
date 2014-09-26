@@ -50,7 +50,11 @@ class Server
   # if buffer has content, at 30ms resolution. recursively call this function on success
   #
   _write_pipe: ->
-    setTimeout (=>
+    timer = setTimeout (=>
+      # clear timer (memory leak!)
+      clearTimeout(timer)
+
+      # recurse
       if @buffer.length == 0
         @_write_pipe()
       else
