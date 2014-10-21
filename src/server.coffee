@@ -42,7 +42,7 @@ class Server
   # create writestream to kernel at /dev/ttyO1
   #
   _setup_writestream: ->
-    @ws = FS.createWriteStream "/dev/ttyO1",
+    @ws = FS.createWriteStream (if process.env.NODE_ENV == 'production' then '/dev/ttyO1' else '/dev/null'),
       flags: "w+"
 
   #
