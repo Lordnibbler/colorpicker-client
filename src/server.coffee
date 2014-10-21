@@ -6,6 +6,7 @@ FS     = require 'fs'
 class Server
   buffer: []
   ws: undefined
+  timer: undefined
 
   constructor: (@host, @port, @options = {}) ->
 
@@ -33,10 +34,18 @@ class Server
       # make an initial call to our recursive _write_pipe() method
       @_write_pipe()
 
-    socket.on 'connect_error', (obj) => console.log 'connect error', obj
-    socket.on 'disconnect',          => console.log "socket at #{@_url()} disconnected"
+    socket.on 'connect_error', (obj) => logger.info 'connect error', obj
+    socket.on 'disconnect',          => @_disconnected
     socket.on 'colorChanged', (data) => @_to_buffer(data)
     socket.on 'colorSet',     (data) => @_to_buffer(data)
+
+  #
+  # when a client disconnects, clear any timer in memory to avoid memory leak or multiple
+  # messages being sent in the future!
+  #
+  _disconnected: ->
+    logger.info "socket at #{@_url()} disconnected"
+    clearTimeout(@timer)
 
   #
   # create writestream to kernel at /dev/ttyO1
@@ -50,9 +59,9 @@ class Server
   # if buffer has content, at 30ms resolution. recursively call this function on success
   #
   _write_pipe: ->
-    timer = setTimeout (=>
-      # clear timer (memory leak!)
-      clearTimeout(timer)
+    @timer = setTimeout (=>
+      # clear @timer (memory leak!)
+      clearTimeout(@timer)
 
       # recurse
       if @buffer.length == 0
