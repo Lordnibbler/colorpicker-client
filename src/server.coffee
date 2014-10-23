@@ -35,7 +35,7 @@ class Server
       @_write_pipe()
 
     socket.on 'connect_error', (obj) => logger.info 'connect error', obj
-    socket.on 'disconnect',          => @_disconnected
+    socket.on 'disconnect',          => @_disconnected()
     socket.on 'colorChanged', (data) => @_to_buffer(data)
     socket.on 'colorSet',     (data) => @_to_buffer(data)
 
@@ -45,7 +45,7 @@ class Server
   #
   _disconnected: ->
     logger.info "socket at #{@_url()} disconnected"
-    clearTimeout(@timer)
+    clearTimeout(@timer) if @timer?
 
   #
   # create writestream to kernel at /dev/ttyO1
@@ -73,15 +73,6 @@ class Server
           @_write_pipe()
         )
     ), 30
-
-    # setInterval (=>
-    #   if @buffer.length > 0
-    #     @ws.write(@buffer, (err, written) =>
-    #       # writestream flushed
-    #       throw err if err
-    #       @buffer = ''
-    #     )
-    # ), 15
 
   #
   # convert halo rgba string to a UART instruction
