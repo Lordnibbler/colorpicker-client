@@ -3,7 +3,7 @@ node_js:
   - "0.10.30"
 before_install:
 script:
-  - "which node"
+  - "npm test"
 
 env:
   - NODE_ENV=test

@@ -1,10 +1,10 @@
 {
   "name": "colorpicker-beaglebone",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "A beaglebone Node.js client to listen to colorpicker, and pipe current color data into a writeStream.",
   "scripts": {
     "start": "coffee index.coffee",
-    "test": "npm test"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -16,13 +16,18 @@
     "url": "https://github.com/Lordnibbler/colorpicker-beaglebone/issues"
   },
   "dependencies": {
-    "log": "~1.4.0",
     "coffee-script": "~1.7",
-    "socket.io": "~1.0.6",
-    "socket.io-client": "~1.0.6"
+    "log": "~1.4.0",
+    "socket.io": "~1.1.0",
+    "socket.io-client": "~1.1.0"
   },
   "engines": {
-    "node": "0.10.x",
+    "node": "0.10.32",
     "npm": "1.3.x"
+  },
+  "devDependencies": {
+    "chai": "^1.9.1",
+    "mocha": "^1.21.4",
+    "sinon": "^1.10.3"
   }
 }

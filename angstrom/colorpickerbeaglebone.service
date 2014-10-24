@@ -1,0 +1,9 @@
+[Unit]
+Description=Wifi Startup Retry
+
+[Service]
+WorkingDirectory=/home/root/colorpicker-beaglebone/wifiboot
+ExecStart=/home/root/colorpicker-beaglebone/wifiboot/wifiboot.sh
+
+[Install]
+WantedBy=multi-user.target
