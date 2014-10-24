@@ -60,9 +60,6 @@ class Server
   #
   _write_pipe: ->
     @timer = setTimeout (=>
-      # clear @timer (memory leak!)
-      clearTimeout(@timer)
-
       # recurse
       if @buffer.length == 0
         @_write_pipe()
@@ -102,6 +99,5 @@ class Server
   #
   _to_buffer: (data) ->
     @buffer = @_data_to_instruction(data)
-
 
 module.exports = Server
