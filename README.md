@@ -112,7 +112,7 @@ systemctl status net.service
 
 You can check your connectivity using `ifconfig`.
 
-3. Starting `colorpicker-beaglebone` at boot
+### 3. Starting `colorpicker-beaglebone` at boot
 
 To start this Beaglebone colorpicker client at boot, you can follow a similar approach to the network connectivity service.  I have provided an example in the `/angstrom` directory of this repository.
 
@@ -132,3 +132,12 @@ WantedBy=multi-user.target
 ```
 
 You can copy the contents of `/angstrom/colorpickerbeaglebone.sh` from this repo if you intend to use UART + Arduino to power the LEDs.
+
+Then enable the service!
+
+```sh
+systemctl enable colorpickerbeaglebone.service
+
+# double check
+systemctl status colorpickerbeaglebone.service
+```
