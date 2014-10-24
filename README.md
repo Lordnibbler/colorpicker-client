@@ -107,6 +107,7 @@ Then enable the service!
 systemctl enable net.service
 
 # double check
+systemctl start net.service
 systemctl status net.service
 ```
 
@@ -139,5 +140,6 @@ Then enable the service!
 systemctl enable colorpickerbeaglebone.service
 
 # double check
+systemctl start colorpickerbeaglebone.service
 systemctl status colorpickerbeaglebone.service
 ```
