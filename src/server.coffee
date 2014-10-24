@@ -69,7 +69,7 @@ class Server
           @buffer = ''
           @_write_pipe()
         )
-    ), 30
+    ), 15
 
   #
   # convert halo rgba string to a UART instruction
