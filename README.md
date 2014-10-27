@@ -1,7 +1,7 @@
 # colorpicker-beaglebone
-A socket.io 1.0 client that connects to a [colorpicker-server](http://github.com/lordnibbler/colorpicker-server) socket.io server.  
+A socket.io 1.1 client that connects to a [colorpicker-server](http://github.com/lordnibbler/colorpicker-server) socket.io server.
 
-Its main purpose is to write rgb color data to a colors.txt file for [halo](https://github.com/lordnibbler/halo) to read.
+Its main purpose is to convert an array of JSON RGB objects like `[{ r: 100, g: 50, b: 0 }, { r: 100, g: 50, b: 0 }` into a UART instruction like `'345,5,1,100,50,0;2,100,50,0,3,000,000,000,4,000,000,000,5,000,000,000;'`, and pipe it over UART to `/dev/ttyO1`.
 
 ## Getting Started
 You'll need a [colorpicker-server](http://github.com/lordnibbler/colorpicker-server) instance running before this client is useful.  You can deploy this server to a free host like Heroku or Nodejitsu, or test locally.
