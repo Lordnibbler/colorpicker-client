@@ -72,22 +72,15 @@ class Server
     ), 15
 
   #
-  # convert halo rgba string to a UART instruction
+  # convert array of rgb objects into a UART instruction for arduino to process and pipe to LEDs
   # @example
-  #   _data_to_instruction({ color: '000,110,255,000\n255,000,000,000' })
-  #   # => '345,5,1,255,000,000;2,255,000,000,3,000,000,000,4,000,000,000,5,000,000,000;'
+  #   _data_to_instruction(color: [{ r: 100, g: 50, b: 0 }, { r: 100, g: 50, b: 0 }, ...)
+  #   # => '345,5,1,100,50,0;2,100,50,0,3,000,000,000,4,000,000,000,5,000,000,000;'
   #
   _data_to_instruction: (data) ->
-    # break colors string into array
-    colors = data.color.split '\n'
-    colors.pop()
-
-    # remove `v` value from each color
-    colors = colors.map (c) -> c.slice(0,-4)
-
     # build our TTY instruction
     instruction = '345,5,'
-    instruction += "#{i+1},#{color};" for color, i in colors
+    instruction += "#{i+1},#{color.r},#{color.g},#{color.b};" for color, i in data.color
 
     # padding with black if necessary
     instruction_count = (instruction.match(/;/g)||[]).length
