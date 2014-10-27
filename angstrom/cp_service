@@ -1,1 +1,1 @@
-cp wifiboot.service /lib/systemd/system/
+cp colorpickerbeaglebone.service /lib/systemd/system/
